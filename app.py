@@ -25,9 +25,14 @@ def stream():
 	return Response(generate_stream(Camera()), mimetype = 'multipart/x-mixed-replace; boundary=mjpegboundary')
 
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) > 1:
-		app.run(host = sys.argv[1], debug = True)
-	else:
-		app.run(debug = True)
+	import argparse
+
+	argparser = argparse.ArgumentParser(add_help = False)
+	argparser.add_argument('-h', '--host', default = '0.0.0.0')
+	argparser.add_argument('-p', '--port', type = int, default = 5000)
+	argparser.add_argument('-d', '--debug', action = 'store_true')
+	argparser.add_argument('-t', '--threaded', action = 'store_true')
+	args = argparser.parse_args()
+
+	app.run(host = args.host, port = args.port, debug = args.debug, threaded = args.threaded)
 
