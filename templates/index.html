@@ -1,6 +1,26 @@
 <html>
-<head><title>PiBot!</title></head>
-<body>
-	<center><img src="{{ url_for('stream') }}" /></center>
-</body>
+<head>
+	<title>PiBot!</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}" />
+</head>
+<body><center>
+	<img src="{{ url_for('stream') }}" />
+	<div class="arrows">
+		<div class="line">
+			<div class="arrow" id="upleft"></div>
+			<div class="arrow" id="up"></div>
+			<div class="arrow" id="upright"></div>
+		</div>
+		<div class="line">
+			<div class="arrow" id="left"></div>
+			<div class="arrow empty"></div>
+			<div class="arrow" id="right"></div>
+		</div>
+		<div class="line">
+			<div class="arrow" id="downleft"></div>
+			<div class="arrow" id="down"></div>
+			<div class="arrow" id="downright"></div>
+		</div>
+	</div>
+</center></body>
 </html>

@@ -1,0 +1,29 @@
+#page { margin: auto; }
+
+.line { display: table-row; }
+.arrows { display: table; }
+.arrow {
+	background: url(OfficinaDisplayArrows.gif) no-repeat;
+	width: 40px;
+	height: 40px;
+	display: table-cell;
+}
+.empty { background: none; }
+
+#left         { background-position: -208px -7px;  }
+#left:active  { background-position: -371px -7px;  }
+#right        { background-position: -165px -7px;  }
+#right:active { background-position: -332px -7px;  }
+#up           { background-position: -292px -7px;  }
+#up:active    { background-position: -37px  -63px; }
+#down         { background-position: -250px -7px;  }
+#down:active  { background-position: 2px    -63px; }
+
+#upleft           { background-position: -126px -175px; }
+#upleft:active    { background-position: -282px -175px; }
+#upright          { background-position: -43px  -175px; }
+#upright:active   { background-position: -205px -175px; }
+#downleft         { background-position: -84px  -175px; }
+#downleft:active  { background-position: -244px -175px; }
+#downright        { background-position: -1px   -175px; }
+#downright:active { background-position: -166px -175px; }
