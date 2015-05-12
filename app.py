@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
 from camera import Camera
+from motors import Motors
 
 app = Flask(__name__)
 
@@ -23,6 +24,17 @@ def generate_stream(cam):
 @app.route('/stream')
 def stream():
 	return Response(generate_stream(Camera()), mimetype = 'multipart/x-mixed-replace; boundary=mjpegboundary')
+
+@app.route('/move', methods = [ 'POST' ])
+def move():
+	commands = [
+		[ Motors.backward_left,  Motors.static_left,  Motors.forward_left  ],
+		[ Motors.backward,       Motors.stop,         Motors.forward       ],
+		[ Motors.backward_right, Motors.static_right, Motors.forward_right ]
+	]
+	x, y = map(lambda k: int(request.form[k]), [ 'x', 'y' ])
+	commands[x + 1][y + 1](Motors())
+	return '{}'
 
 if __name__ == '__main__':
 	import argparse

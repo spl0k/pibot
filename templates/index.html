@@ -2,6 +2,7 @@
 <head>
 	<title>PiBot!</title>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}" />
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 </head>
 <body><center>
 	<img src="{{ url_for('stream') }}" />
@@ -22,5 +23,34 @@
 			<div class="arrow" id="downright"></div>
 		</div>
 	</div>
+	<script type="text/javascript">
+		var dir = { x: 0, y: 0 };
+		function move(x, y) {
+			if(x == dir.x && y == dir.y)
+				return;
+
+			dir = { x: x, y: y };
+			$.ajax({
+				type: 'POST',
+				url: '{{ url_for('move') }}',
+				data: dir
+			});
+		}
+		function stop() {
+			move(0, 0);
+		}
+
+		$('#upleft')   .mousedown(function() { move(-1,  1); });
+		$('#up')       .mousedown(function() { move( 0,  1); });
+		$('#upright')  .mousedown(function() { move( 1,  1); });
+		$('#left')     .mousedown(function() { move(-1,  0); });
+		$('#right')    .mousedown(function() { move( 1,  0); });
+		$('#downleft' ).mousedown(function() { move(-1, -1); });
+		$('#down')     .mousedown(function() { move( 0, -1); });
+		$('#downright').mousedown(function() { move( 1, -1); });
+
+		$('.arrow[id]').mouseup (stop);
+		$('.arrow[id]').mouseout(stop);
+	</script>
 </center></body>
 </html>
