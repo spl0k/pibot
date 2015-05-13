@@ -31,9 +31,10 @@
 
 			dir = { x: x, y: y };
 			$.ajax({
-				type: 'POST',
+				method: 'POST',
 				url: '{{ url_for('move') }}',
-				data: dir
+				data: dir,
+				timeout: 5000
 			});
 		}
 		function stop() {

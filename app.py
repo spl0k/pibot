@@ -14,6 +14,10 @@ def index():
 def generate_stream(cam):
 	while True:
 		frame = cam.get_frame()
+		if not frame:
+			app.logger.error('Camera sent an empty frame')
+			break
+
 		yield b'--mjpegboundary\r\n' + \
 			b'Content-Type: image/jpeg\r\n' + \
 			b'Content-Length: ' + str(len(frame)) + b'\r\n' + \

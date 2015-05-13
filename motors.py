@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import time
-from threading import Timer
+from threading import Timer, Lock
 import RPi.GPIO as GPIO
 
 class Motors(object):
@@ -12,6 +12,7 @@ class Motors(object):
 	PIN_RIGHT_R = 6
 
 	__timer = None
+	__timer_lock = Lock()
 
 	def __init__(self):
 		if Motors.__timer:
@@ -32,13 +33,15 @@ class Motors(object):
 		GPIO.output(Motors.PIN_RIGHT_R, 0)
 		GPIO.output(Motors.PIN_ENABLE,  1)
 
-		Motors.__timer = Timer(5, Motors.__timeout)
-		Motors.__timer.start()
+		with self.__timer_lock:
+			Motors.__timer = Timer(5, Motors.__timeout)
+			Motors.__timer.start()
 
 	def drive(self, left, right):
-		Motors.__timer.cancel()
-		Motors.__timer = Timer(5, Motors.__timeout)
-		Motors.__timer.start()
+		with self.__timer_lock:
+			Motors.__timer.cancel()
+			Motors.__timer = Timer(5, Motors.__timeout)
+			Motors.__timer.start()
 
 		if left == 0:
 			GPIO.output(Motors.PIN_LEFT_F, 0)
@@ -95,5 +98,6 @@ class Motors(object):
 		GPIO.output(Motors.PIN_RIGHT_R, 0)
 		GPIO.output(Motors.PIN_ENABLE,  0)
 
-		cls.__timer = None
+		with cls.__timer_lock:
+			cls.__timer = None
 
