@@ -8,7 +8,7 @@ from camera import Camera
 from motors import Motors
 
 app = Flask(__name__)
-Devices.set_classes([ Camera ])
+Devices.set_classes([ Camera, Motors ])
 
 @app.route('/')
 def index():
@@ -46,7 +46,7 @@ def move():
 		[ Motors.backward_right, Motors.static_right, Motors.forward_right ]
 	]
 	x, y = map(lambda k: int(request.form[k]), [ 'x', 'y' ])
-	commands[x + 1][y + 1](Motors())
+	commands[x + 1][y + 1](Devices.get_device_instance(Motors))
 	return '{}'
 
 if __name__ == '__main__':

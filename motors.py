@@ -1,23 +1,16 @@
 # coding: utf-8
 
-import time
-from threading import Timer, Lock
 import RPi.GPIO as GPIO
+import devices
 
-class Motors(object):
+class Motors(devices.Device):
 	PIN_ENABLE = 12
 	PIN_LEFT_F = 26
 	PIN_LEFT_R = 19
 	PIN_RIGHT_F = 13
 	PIN_RIGHT_R = 6
 
-	__timer = None
-	__timer_lock = Lock()
-
 	def __init__(self):
-		if Motors.__timer:
-			return
-
 		GPIO.setwarnings(False)
 		GPIO.setmode(GPIO.BCM)
 
@@ -33,15 +26,8 @@ class Motors(object):
 		GPIO.output(Motors.PIN_RIGHT_R, 0)
 		GPIO.output(Motors.PIN_ENABLE,  1)
 
-		with self.__timer_lock:
-			Motors.__timer = Timer(5, Motors.__timeout)
-			Motors.__timer.start()
-
 	def drive(self, left, right):
-		with self.__timer_lock:
-			Motors.__timer.cancel()
-			Motors.__timer = Timer(5, Motors.__timeout)
-			Motors.__timer.start()
+		devices.Devices.notify_activity()
 
 		if left == 0:
 			GPIO.output(Motors.PIN_LEFT_F, 0)
@@ -90,14 +76,10 @@ class Motors(object):
 	def static_right(self):
 		self.drive(1, -1)
 
-	@classmethod
-	def __timeout(cls):
+	def shutdown(self):
 		GPIO.output(Motors.PIN_LEFT_F,  0)
 		GPIO.output(Motors.PIN_LEFT_R,  0)
 		GPIO.output(Motors.PIN_RIGHT_F, 0)
 		GPIO.output(Motors.PIN_RIGHT_R, 0)
 		GPIO.output(Motors.PIN_ENABLE,  0)
-
-		with cls.__timer_lock:
-			cls.__timer = None
 
