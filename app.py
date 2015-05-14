@@ -2,21 +2,29 @@
 # coding: utf-8
 
 from flask import Flask, render_template, Response, request
+import time
+from devices import Devices
 from camera import Camera
 from motors import Motors
 
 app = Flask(__name__)
+Devices.set_classes([ Camera ])
 
 @app.route('/')
 def index():
+	Devices.startup()
 	return render_template('index.html')
 
 def generate_stream(cam):
 	while True:
 		frame = cam.get_frame()
 		if not frame:
-			app.logger.error('Camera sent an empty frame')
-			break
+			app.logger.warn('Camera sent an empty frame')
+			time.sleep(0.1)
+			frame = cam.get_frame()
+			if not frame:
+				app.logger.error('Frame still null')
+				break
 
 		yield b'--mjpegboundary\r\n' + \
 			b'Content-Type: image/jpeg\r\n' + \
@@ -27,7 +35,8 @@ def generate_stream(cam):
 
 @app.route('/stream')
 def stream():
-	return Response(generate_stream(Camera()), mimetype = 'multipart/x-mixed-replace; boundary=mjpegboundary')
+	cam = Devices.get_device_instance(Camera)
+	return Response(generate_stream(cam), mimetype = 'multipart/x-mixed-replace; boundary=mjpegboundary')
 
 @app.route('/move', methods = [ 'POST' ])
 def move():

@@ -1,58 +1,44 @@
 # coding: utf-8
 
-import time
 import io
-from threading import Thread, Condition
+import time
+from threading import Lock
 import picamera
+import devices
 
-class Camera(object):
-	__thread = None
+class Camera(devices.Device):
 	__frame = None
-	__frame_cond = None
-	__last_read = 0
+	__lock = Lock()
 
 	def __init__(self):
-		if Camera.__thread:
-			return
+		self.__cam = picamera.PiCamera()
+		self.__cam.resolution = (320, 240)
+		self.__cam.hflip = True
+		self.__cam.vflip = True
 
-		if not Camera.__frame_cond:
-			Camera.__frame_cond = Condition()
+		self.__cam.start_preview()
+		time.sleep(2)
 
-		Camera.__thread = Thread(target = self.__capture)
-		Camera.__thread.start()
-
-		with Camera.__frame_cond:
-			Camera.__frame_cond.wait()
+		self.__memstream = io.BytesIO()
+		self.__iter = self.__cam.capture_continuous(self.__memstream, 'jpeg', use_video_port = True)
 
 	def get_frame(self):
-		Camera.__last_read = time.time()
-		with Camera.__frame_cond:
-			return Camera.__frame
+		devices.Devices.notify_activity()
+		with self.__lock:
+			return self.__frame
 
-	@classmethod
-	def __capture(cls):
-		with picamera.PiCamera() as cam:
-			cam.resolution = (320, 240)
-			cam.hflip = True
-			cam.vflip = True
+	def update(self):
+		self.__iter.next()
+		self.__memstream.seek(0)
+		with self.__lock:
+			self.__frame = self.__memstream.read()
+		self.__memstream.seek(0)
+		self.__memstream.truncate()
 
-			cam.start_preview()
-			time.sleep(2)
-
-			stream = io.BytesIO()
-			for _ in cam.capture_continuous(stream, 'jpeg', use_video_port = True):
-				stream.seek(0)
-				with cls.__frame_cond:
-					cls.__frame = stream.read()
-					cls.__frame_cond.notify()
-				stream.seek(0)
-				stream.truncate()
-
-				if cls.__last_read > 0 and time.time() - cls.__last_read > 10:
-					break
-
-		with cls.__frame_cond:
-			cls.__frame = None
-		cls.__thread = None
-		cls.__last_read = 0
+	def shutdown(self):
+		with self.__lock:
+			self.__frame = None
+		self.__iter.close()
+		self.__cam.stop_preview()
+		self.__cam.close()
 
