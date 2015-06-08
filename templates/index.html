@@ -2,7 +2,8 @@
 <head>
 	<title>PiBot!</title>
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}" />
-	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
 </head>
 <body><center>
 	<img src="{{ url_for('stream') }}" />
@@ -24,18 +25,15 @@
 		</div>
 	</div>
 	<script type="text/javascript">
+	$(document).ready(function() {
 		var dir = { x: 0, y: 0 };
+		var socket = io.connect('/cmd')
 		function move(x, y) {
 			if(x == dir.x && y == dir.y)
 				return;
 
 			dir = { x: x, y: y };
-			$.ajax({
-				method: 'POST',
-				url: '{{ url_for('move') }}',
-				data: dir,
-				timeout: 5000
-			});
+			socket.emit('move', { data: dir });
 		}
 		function stop() {
 			move(0, 0);
@@ -52,6 +50,7 @@
 
 		$('.arrow[id]').mouseup (stop);
 		$('.arrow[id]').mouseout(stop);
+	});
 	</script>
 </center></body>
 </html>
